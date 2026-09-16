@@ -18,27 +18,22 @@
   <img src="https://img.shields.io/badge/Tests-250%2B%20passing-brightgreen" alt="Tests: more than 250 passing">
 </p>
 
-> ### Curated Cursor / Grok Bot fork
+> ### Cursor plugin (curated from AgriciDaniel/claude-blog)
 >
-> This repository is a **curated fork** of
+> This repository is a **Cursor plugin** named `cursor-blog` (display name
+> "Cursor Blog"), curated from
 > [`AgriciDaniel/claude-blog`](https://github.com/AgriciDaniel/claude-blog)
-> (MIT), reframed for **Cursor Agent Skills** and Grok Bot house use. The
-> Cursor-ready skills are packaged as a real Cursor plugin named `cursor-blog`
-> (display name "Cursor Blog") under
-> [`plugins/cursor-blog/`](plugins/cursor-blog), while the parts that are Claude
-> Code only (installers, `.claude-plugin/` manifest, `/blog` slash-command CLI,
-> subagents, Brain) are clearly marked and kept out of the plugin payload.
+> (MIT). The skills, references, templates, and Python tooling are packaged
+> under [`plugins/cursor-blog/`](plugins/cursor-blog) and installed as a Cursor
+> plugin; the Cursor plugin is the only supported install path.
 >
 > - New here? Jump to [Use in Cursor: the `cursor-blog` plugin](#use-in-cursor-the-cursor-blog-plugin).
-> - Read [`CURATION.md`](CURATION.md) first: it maps what is Cursor ready, what
->   was adapted, and what is left as upstream Claude Code reference.
-> - Claude Code specific artifacts are indexed in
->   [`docs/upstream-claude-code/README.md`](docs/upstream-claude-code/README.md).
-> - Nothing was installed into `~/.claude`, a local skills library, or a Cursor
->   marketplace. All upstream credit, license, and attribution are preserved.
-> - The rest of this README below is the **upstream Claude Code documentation**,
->   kept for reference. Where it says "install into `~/.claude`" or "run `/blog`",
->   see the Cursor equivalents in [`CURATION.md`](CURATION.md).
+> - Read [`CURATION.md`](CURATION.md) for what was adapted from upstream.
+> - The Claude Code specific leftovers (installer scripts, `.claude-plugin/`
+>   manifest, subagent files, and the vendored Brain) have been removed from
+>   this repository. All upstream credit, license, and attribution are
+>   preserved (see [`LICENSE`](LICENSE), [`NOTICE`](NOTICE), and
+>   [`CITATION.cff`](CITATION.cff)).
 
 **claude-blog is a Claude Code skill suite that writes, optimizes, audits, localizes, and refreshes blog content at scale.** Every article is evaluated for Google-aligned usefulness and internal AI citation readiness heuristics. Version 2.2.0 was prepared on 2026-08-26.
 
@@ -129,8 +124,8 @@ The orchestrator in `skills/blog/SKILL.md` parses `/blog` input, detects the tar
 | Sub-skills | 31 | `skills/blog-*/SKILL.md` |
 | User-facing `/blog` commands | 30 | `skills/blog/SKILL.md` routing table |
 | Internal-only sub-skill | 1 | `skills/blog-chart/SKILL.md` |
-| Specialized agents | 5 | `agents/blog-*.md` |
-| Root scripts | 14 | `scripts/*.py` |
+| Specialized agent roles | 5 | run inline by the main agent |
+| Root scripts | 16 | `scripts/*.py` |
 | References | 22 | `skills/blog/references/*.md` |
 | Templates | 12 | `skills/blog/templates/*.md` |
 | Tests | 252 | `tests/` |
@@ -150,7 +145,7 @@ Every `/blog write` and `/blog rewrite` result must pass the delivery contract b
 | 1. Capability Discovery | Required tools, agents, env vars, and optional dependencies are known before writing | `scripts/blog_preflight.py --gate 1` |
 | 2. Format Completeness | `.md`, `.html`, `.pdf`, and a real hero image exist | `scripts/blog_render.py`, `scripts/generate_hero.py` |
 | 3. Visual Verification | Screenshots render at 375, 768, and 1280 widths, JSON-LD is valid, dark mode holds, SVGs do not overflow | `patchright` or `playwright` |
-| 4. Content Review | `blog-reviewer` score is 90+ with zero P0 issues | `agents/blog-reviewer.md` |
+| 4. Content Review | `blog-reviewer` score is 90+ with zero P0 issues | the `blog-reviewer` role (run inline) |
 | 5. Asset and Link Integrity | Images resolve, `og:image` exists, links return 200, word count matches schema within 5% | `scripts/blog_preflight.py --gate 5` |
 
 Hero image ladder: Banana MCP, direct Gemini API, premium stock APIs, then Openverse. First working source wins. Full spec: [`skills/blog/references/blog-delivery-contract.md`](skills/blog/references/blog-delivery-contract.md).
@@ -268,17 +263,13 @@ Scoring bands: Exceptional (90-100), Strong (80-89), Acceptable (70-79), Below S
 
 Adapted attribution lives in [`CONTRIBUTORS.md`](docs/CONTRIBUTORS.md).
 
-## Brain Provenance
-
-The Claude Blog Brain is vendored at `./brain` as a self-contained, evidence-gated Obsidian brain. It is not part of the plugin payload; all skill tooling remains scoped to `skills/`. Brain-derived updates land through reviewed reference, script, and documentation changes.
-
 ## Install
 
 ### Use in Cursor: the `cursor-blog` plugin
 
-Cursor does not auto-scan a bare top-level `skills/` directory. This fork ships a
-real **Cursor plugin** named `cursor-blog` (display name "Cursor Blog") that
-packages the Cursor-ready skills in the layout Cursor discovers. It lives at
+Cursor does not auto-scan a bare top-level `skills/` directory. This repository
+ships a real **Cursor plugin** named `cursor-blog` (display name "Cursor Blog")
+that packages the skills in the layout Cursor discovers. It lives at
 [`plugins/cursor-blog/`](plugins/cursor-blog) with a
 `plugins/cursor-blog/.cursor-plugin/plugin.json` manifest, and the repo-root
 [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) catalog lists
@@ -292,98 +283,37 @@ cp -r plugins/cursor-blog ~/.cursor/plugins/local/cursor-blog
 ```
 
 Then restart Cursor (or run `Developer: Reload Window`) and confirm "Cursor Blog"
-appears in Customize under Skills. Full install and usage details are in
+appears in Customize under Skills. You can also import the repository from GitHub
+in Customize with "From GitHub Repository"; the root
+[`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) lists the
+plugin. Full install and usage details are in
 [`plugins/cursor-blog/README.md`](plugins/cursor-blog/README.md) and
-[`CURATION.md`](CURATION.md). The Claude Code subagents in `agents/`, the
-`.claude-plugin/` manifest, `brain/`, and the installer scripts are intentionally
-excluded from the plugin payload.
+[`CURATION.md`](CURATION.md).
 
 Publishing `cursor-blog` to the Cursor Marketplace is optional and can be done
-later.
-
-### Install in Claude Code (upstream reference)
-
-The instructions below are the upstream Claude Code installation path. They copy
-the suite into `~/.claude` and are **not** required for the Cursor use case; they
-are kept here for parity with upstream. See
-[`docs/upstream-claude-code/README.md`](docs/upstream-claude-code/README.md).
-
-Plugin install for Claude Code 1.0.33+:
-
-```bash
-/plugin marketplace add AgriciDaniel/claude-blog
-/plugin install claude-blog@agricidaniel-blog
-```
-
-Recommended clone, verify, then install flow:
-
-```bash
-git clone https://github.com/AgriciDaniel/claude-blog.git
-cd claude-blog
-git checkout v2.2.0
-chmod +x install.sh
-./install.sh
-```
-
-One-command install on Unix and macOS:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-blog/main/install.sh | CLAUDE_BLOG_REF=v2.2.0 bash
-```
-
-One-command install on Windows PowerShell:
-
-```powershell
-$env:CLAUDE_BLOG_REF = "v2.2.0"
-irm https://raw.githubusercontent.com/AgriciDaniel/claude-blog/main/install.ps1 -OutFile install.ps1
-pwsh -File ./install.ps1
-```
-
-Verify installer integrity before running:
-
-```bash
-curl -fsSL -o install.sh https://raw.githubusercontent.com/AgriciDaniel/claude-blog/main/install.sh
-echo "25f73e7efbe9e714d00af34d2c6b48bd59d60a14976e2eb032b8ad5c2f756ce4  install.sh" | sha256sum -c
-CLAUDE_BLOG_REF=v2.2.0 bash install.sh
-```
-
-The SHA-256 above is for the current `install.sh` at HEAD on `main`; `CLAUDE_BLOG_REF` pins the repository clone performed by the installer. Verify against [the canonical file](https://github.com/AgriciDaniel/claude-blog/blob/main/install.sh) before running. The `install.ps1` companion hash is `a574688ba4ca27b7fbac7a26e6c95d1a6a596688f59d16ddbcc452d82f5fea7a`.
-
-Restart Claude Code after installation to activate.
-
-Uninstall on Unix and macOS:
-
-```bash
-chmod +x uninstall.sh
-./uninstall.sh
-```
-
-Uninstall on Windows PowerShell:
-
-```powershell
-.\uninstall.ps1
-```
+later. The Cursor plugin is the only supported install path; the upstream Claude
+Code installer scripts and `.claude-plugin/` manifest are not part of this
+repository.
 
 Installation details: [`docs/INSTALLATION.md`](docs/INSTALLATION.md).
 
 ## Requirements
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed and configured.
+- [Cursor](https://cursor.com) with the `cursor-blog` plugin installed.
 - Python 3.11+ for quality scoring, the delivery contract runners, renderers, and lint.
 - Optional: `pip install -r requirements.txt` for advanced analysis, readability scoring, schema detection, and media workflows.
 
 ### Automated CI Quality Gates
 
-1. **pytest**: the complete security, behavioral, regression, installer, and delivery-contract suite.
-2. **Plugin validation**: `claude plugin validate .` plus manifest, marketplace, and frontmatter checks.
-3. **Stale-path lint**: catches drift in `references/`, `templates/`, command docs, and installer payloads.
+1. **pytest**: the complete security, behavioral, regression, and delivery-contract suite.
+2. **SKILL.md frontmatter validation**: every skill declares valid frontmatter fields within the size caps.
+3. **Stale-path lint**: catches drift in `references/`, `templates/`, and command docs.
 4. **Prose hygiene**: `scripts/lint_prose.py` enforces no em dash, no en dash, and no ASCII double-hyphen prose.
 5. **Secret adjudication**: `scripts/check_secrets.py` fails on unapproved detector findings and credential-shaped values without printing raw values.
 6. **Version coherence**: canonical version surfaces must all match the release version.
 7. **Command coherence**: `skills/blog/SKILL.md` and [`docs/COMMANDS.md`](docs/COMMANDS.md) must declare the same command set.
 8. **Repository consistency**: validates local reference targets, FLOW prompt locks, and reports orphaned resources without blocking.
 9. **Hash-locked dependency smoke**: installs the audio and NotebookLM locks with `--require-hashes`, then initializes google-genai, Patchright, and preflight without API calls or a browser launch.
-10. **Brain validation**: changes under `brain/**` run its pytest suite, vault lint, and report-only audit.
 
 Run locally before pushing:
 
@@ -391,7 +321,7 @@ Run locally before pushing:
 python3 -m pytest tests/
 python3 scripts/check_secrets.py
 python3 scripts/lint_prose.py
-claude plugin validate .
+python3 scripts/consistency_check.py --root .
 ```
 
 ## How Does claude-blog Compare?
@@ -450,7 +380,7 @@ See [How To Cite](#how-to-cite) or [`CITATION.cff`](CITATION.cff). GitHub also s
 
 ### Is claude-blog secure to install?
 
-The recommended flow downloads the installer as a file so you can inspect it before execution. v2.2.0 uses pinned refs, allowlisted recursive payload copies, manifest-backed uninstall, prose lint, version coherence checks, repository consistency checks, and installer regression tests. See [`SECURITY.md`](.github/SECURITY.md).
+The `cursor-blog` plugin is a self-contained directory you copy into Cursor; there is no download-to-execute installer. v2.2.0 uses prose lint, version coherence checks, repository consistency checks, secret adjudication, and a broad regression suite. See [`SECURITY.md`](.github/SECURITY.md).
 
 ## Documentation Index
 
@@ -491,7 +421,7 @@ Contributions are welcome. See [`CONTRIBUTING.md`](.github/CONTRIBUTING.md) for 
 
 1. Run `python3 -m pytest tests/` and confirm the full suite passes.
 2. Run `python3 scripts/lint_prose.py` and confirm zero violations.
-3. Run `claude plugin validate .`.
+3. Run `python3 scripts/consistency_check.py --root .` and confirm zero errors.
 4. Bump versions coherently if you touch user-visible counts or behavior.
 
 ## License

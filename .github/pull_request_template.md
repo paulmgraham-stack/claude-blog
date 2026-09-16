@@ -15,14 +15,14 @@
 ## Test plan
 - [ ] Existing tests pass (`python3 -m pytest tests/ -v`)
 - [ ] New tests added for new behavior
-- [ ] `claude plugin validate .` passes
+- [ ] `python3 scripts/consistency_check.py --root .` passes
 - [ ] Manual testing completed for any user-facing flows
 - [ ] No new U+2014, U+2013, or ` -- ` in prose; matches project style
 
 ## Documentation
 - [ ] Docs updated (`README.md`, `CHANGELOG.md`, relevant `SKILL.md`, `docs/`)
 - [ ] CONTRIBUTORS.md updated if a third-party methodology was adapted
-- [ ] No version-count drift (sub-skills count consistent across README, plugin.json, CLAUDE.md, docs/COMMANDS.md, blog/SKILL.md)
+- [ ] No version-count drift (sub-skills count consistent across README, plugin.json, docs/COMMANDS.md, blog/SKILL.md)
 
 ## Security checklist (if applicable)
 - [ ] No new hardcoded secrets, API keys, or credentials

@@ -3,13 +3,9 @@
 
 # Security-critical paths require explicit review
 skills/ @AgriciDaniel
-agents/ @AgriciDaniel
-.claude-plugin/ @AgriciDaniel
+plugins/cursor-blog/ @AgriciDaniel
+.cursor-plugin/ @AgriciDaniel
 .mcp.json @AgriciDaniel
 .mcp.example.json @AgriciDaniel
 .gitignore @AgriciDaniel
-install.sh @AgriciDaniel
-install.ps1 @AgriciDaniel
-uninstall.sh @AgriciDaniel
-uninstall.ps1 @AgriciDaniel
 .github/workflows/ @AgriciDaniel

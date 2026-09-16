@@ -45,7 +45,7 @@ The point: **a draft can score zero on a phrase list and still be repetitive or 
 This is what the advisory style diagnostics in `blog-analyze` and
 `blog-rewrite` cover. Documented here for completeness.
 
-**Trigger phrases** (full list in `agents/blog-reviewer.md` and `scripts/analyze_blog.py`):
+**Trigger phrases** (full list in the `blog-reviewer` role guidance and `scripts/analyze_blog.py`):
 
 - "In today's digital landscape" / "In the ever-evolving"
 - "It's important to note" / "It is worth mentioning"

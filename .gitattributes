@@ -18,10 +18,6 @@
 *.md linguist-documentation=true
 
 # Agent prompts and templates are documentation
-agents/**     linguist-documentation=true
 skills/**/references/** linguist-documentation=true
 skills/**/templates/**  linguist-documentation=true
 docs/**       linguist-documentation=true
-
-# The bundled brain is vendored and excluded from language statistics
-brain/** linguist-vendored
