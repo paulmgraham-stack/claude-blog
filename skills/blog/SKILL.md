@@ -253,6 +253,40 @@ For `/blog audit`, step 6 runs in parallel across all posts in the directory.
 
 Internal workflow details live in `skills/blog/references/orchestration-details.md`.
 
+## Running in Cursor (curated fork)
+
+This repository is a curated Cursor fork. When it is loaded as a Cursor Agent
+Plugin (root `plugin.json`, see `CURATION.md`), the skills are discovered from
+`skills/`, but the Claude Code subagents in `agents/` and the `~/.claude/scripts`
+install tree are NOT present. Two adjustments make the workflows run in Cursor
+without a Claude Code install:
+
+1. **Helper scripts: point the absolute overrides at this repo.** The delivery
+   contract and untrusted-context loader resolve helpers from
+   `$HOME/.claude/scripts` by default and refuse project-local `scripts/` from an
+   untrusted current working directory. Both accept an operator-pinned absolute
+   override, so set them to this repo's own `scripts/` directory (an absolute
+   path you control):
+
+   ```bash
+   export CLAUDE_BLOG_SCRIPTS_DIR="/abs/path/to/claude-blog/scripts"
+   export CLAUDE_BLOG_LOAD_UNTRUSTED_HELPER="/abs/path/to/claude-blog/scripts/load_untrusted_root.py"
+   ```
+
+   These are the same absolute-override code paths the security model already
+   allows; the CWD-based fallback stays disabled.
+
+2. **Agents: run their instructions inline when Task subagents are not
+   registered.** In Claude Code, steps 2 to 6 dispatch `blog-researcher`,
+   `blog-writer`, `blog-seo`, and the blocking `blog-reviewer` via the Task tool.
+   In Cursor those agent files are not auto-registered from `agents/`. Either
+   register equivalent Cursor subagents, or have the main agent follow the same
+   role instructions inline from `agents/*.md`. The Python delivery-contract CLIs
+   (`scripts/blog_render.py`, `scripts/blog_preflight.py`,
+   `scripts/generate_hero.py`) run directly either way, and the Gate 4 review is
+   scored against `skills/blog/references/quality-scoring.md`. The gates still
+   review before the user; only the dispatch mechanism changes.
+
 ## Integration
 
 Chart generation is built-in - no external dependencies required for full functionality.
