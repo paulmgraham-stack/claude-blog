@@ -5,17 +5,18 @@
 This repository is a **curated fork** of
 [`AgriciDaniel/claude-blog`](https://github.com/AgriciDaniel/claude-blog)
 (MIT), prepared for **Cursor / Grok Bot house use**. Upstream is an excellent,
-comprehensive Claude Code plugin suite. This fork packages the Cursor-ready blog
-and SEO skills as a real **Cursor plugin** named `cursor-blog` (display name
-"Cursor Blog") under [`plugins/cursor-blog/`](plugins/cursor-blog), and clearly
-marks the parts that are Claude Code only.
+comprehensive Claude Code plugin suite. This fork packages the blog and SEO
+skills as a real **Cursor plugin** named `cursor-blog` (display name
+"Cursor Blog") under [`plugins/cursor-blog/`](plugins/cursor-blog). The
+Claude Code only leftovers have been removed so the repository reads as a
+Cursor plugin repo, not a dual Claude/Cursor mirror.
 
 Nothing here was installed onto anyone's machine, into `~/.claude`, into
 `~/.cursor`, or into Grok Bot house skills. The only changes are to files inside
 this GitHub repository, delivered through a branch and pull request.
 
-The goal is that a reviewer can tell in one read which parts are Cursor ready and
-which are left in place as upstream Claude Code reference. This file is the map.
+The goal is that a reviewer can tell in one read what is Cursor ready and what
+was adapted from upstream. This file is the map.
 
 > Attribution and license are preserved in full. See [`LICENSE`](LICENSE),
 > [`NOTICE`](NOTICE), [`CITATION.cff`](CITATION.cff), and
@@ -31,10 +32,10 @@ which are left in place as upstream Claude Code reference. This file is the map.
 
 | Bucket | Meaning | Where |
 |---|---|---|
-| The plugin | The Cursor plugin `cursor-blog`: a self-contained, discoverable copy of the Cursor-ready skills, references, templates, and Python tooling | `plugins/cursor-blog/`, `.cursor-plugin/marketplace.json` |
-| Upstream source tree | The original skills and tooling, kept in place so the upstream test suite stays green and the plugin can be regenerated | `skills/`, `scripts/`, `tests/` |
+| The plugin | The Cursor plugin `cursor-blog`: a self-contained, discoverable copy of the skills, references, templates, and Python tooling | `plugins/cursor-blog/`, `.cursor-plugin/marketplace.json` |
+| Source tree | The skills and tooling, kept in place so the test suite stays green and the plugin can be regenerated | `skills/`, `scripts/`, `tests/` |
 | Secondary (needs external setup) | Bundled in the plugin but only work with external API keys or MCP servers | `blog-google`, `blog-audio`, `blog-notebooklm`, `blog-image` |
-| Quarantined (upstream Claude Code reference) | Kept in the repo root, NOT part of the plugin payload | install scripts, `.claude-plugin/`, `/blog` slash-command CLI framing, `agents/`, `brain/` |
+| Removed (Claude Code only) | Deleted from this repository during Cursor cleanup | install/uninstall scripts, `.claude-plugin/`, subagent files (`agents/`), the vendored Brain (`brain/`), and `CLAUDE.md` |
 
 Full detail and rationale follow.
 
@@ -186,8 +187,9 @@ Be precise about what "ready" means for `blog-write` and `blog-rewrite`:
 - **Fully orchestrated 5-gate delivery contract needs adaptation.** Upstream
   `blog-write` / `blog-rewrite` dispatch Task subagents (`blog-researcher`,
   `blog-writer`, `blog-seo`, and a blocking `blog-reviewer`) and resolve helper
-  scripts from `$HOME/.claude/scripts`. Those subagents live in `agents/`, which
-  is **not** part of the plugin, and there is no `~/.claude` install in Cursor.
+  scripts from `$HOME/.claude/scripts`. Those subagent files were removed in the
+  Cursor cleanup, and there is no `~/.claude` install in Cursor; the roles run
+  inline instead.
 
 The orchestrator carries a "Running in Cursor" section
 (`skills/blog/SKILL.md`, copied into the plugin) that documents the two
@@ -235,35 +237,30 @@ capability:
    ignores them harmlessly.
 3. **Orchestrator "Running in Cursor" section** documenting the helper overrides
    and inline-agent fallback (see above).
-4. **README.md and docs/INSTALLATION.md.** A curated-fork banner and a "Use in
-   Cursor: the `cursor-blog` plugin" section were added; `docs/INSTALLATION.md`
-   now carries an upstream-reference-only banner so the Claude Code installer
-   guide cannot be mistaken for the Cursor path. Upstream credit, links, and the
-   installer integrity hashes are preserved.
+4. **README.md and docs/INSTALLATION.md.** The README banner and a "Use in
+   Cursor: the `cursor-blog` plugin" section describe the Cursor plugin as the
+   only install path; `docs/INSTALLATION.md` is a Cursor plugin install guide.
+   Upstream credit and links are preserved.
 
 ---
 
-## Quarantined: upstream Claude Code reference (not in the plugin payload)
+## Removed: Claude Code only leftovers
 
-These artifacts are Claude Code specific. They are **kept in the repo root** so
-the fork stays a faithful, low-drift mirror of upstream and the upstream test
-suite keeps passing, but they are **excluded from `plugins/cursor-blog/`**. See
-[`docs/upstream-claude-code/README.md`](docs/upstream-claude-code/README.md) for
-the in-tree index.
+These artifacts were Claude Code specific and have been **deleted** from this
+repository so it reads cleanly as a Cursor plugin repo rather than a dual
+Claude/Cursor mirror. Full upstream copies remain available at
+[`AgriciDaniel/claude-blog`](https://github.com/AgriciDaniel/claude-blog).
 
-| Artifact | Why it is Claude Code specific | In Cursor |
+| Removed artifact | Why it was Claude Code specific | In Cursor |
 |---|---|---|
-| `install.sh`, `install.ps1` | Copy skills, agents, and scripts into `~/.claude` | Not needed: install the `cursor-blog` plugin instead |
-| `uninstall.sh`, `uninstall.ps1` | Remove the `~/.claude` install | Not needed |
+| `install.sh`, `install.ps1` | Copied skills, agents, and scripts into `~/.claude` | Not needed: install the `cursor-blog` plugin instead |
+| `uninstall.sh`, `uninstall.ps1` | Removed the `~/.claude` install | Not needed |
 | `.claude-plugin/plugin.json` | Claude Code plugin manifest | Replaced by `plugins/cursor-blog/.cursor-plugin/plugin.json` |
 | `.claude-plugin/marketplace.json` | Claude Code marketplace catalog | Replaced by `.cursor-plugin/marketplace.json` |
-| `/blog <command>` slash CLI framing | Claude Code slash commands and `argument-hint` | Invoke skills by natural language or `/skill-name`; the routing table is still a capability map |
-| `agents/*.md` | Claude Code subagent format (`tools:` frontmatter, Task dispatch) | Not bundled; run their instructions inline or register Cursor subagents |
+| `agents/*.md` | Claude Code subagent format (`tools:` frontmatter, Task dispatch) | Run the roles inline or register Cursor subagents |
 | `brain/` | Vendored Obsidian authoring brain; never part of any plugin payload | Not used by the Cursor skill surface |
-| `claude plugin validate .` (CI job `validate-skills`) | Requires the Claude Code CLI | See "Tests" for what runs without it |
-
-Nothing in this bucket was deleted, so reverting the fork to a pure upstream
-mirror is trivial.
+| `CLAUDE.md` | Claude Code project instructions | Not used by Cursor |
+| `docs/upstream-claude-code/` | Index of the quarantined Claude Code artifacts | No longer needed once the artifacts are removed |
 
 ---
 
@@ -319,52 +316,30 @@ python3 scripts/consistency_check.py --root .
 python3 scripts/check_secrets.py
 ```
 
-Honesty about corroboration: `347 passed, 1 skipped` is an author-local
-observation. GitHub Actions appears disabled on this fork (no CI runs are
-reported on the repository), so this PR currently has no independent CI check. The
-repository already contains `.github/workflows/ci.yml`, which runs the full
-`pytest` suite via `pip install -e ".[dev]"` on `pull_request` to `main`; enabling
-Actions on the fork will corroborate the result automatically. Independent of
-CI, `scripts/lint_prose.py` and `scripts/consistency_check.py --root .` pass
-(0 errors, 0 warnings).
-
-### Checks that DO apply (kept green)
+### Checks that apply (kept green)
 
 - `tests/` full suite: scoring, delivery contract, security guardrails,
-  installer-sync, command coherence, version coherence, release safeguards,
-  prose lint, and the untrusted-root loader.
+  command coherence, version coherence, release safeguards, prose lint, and the
+  untrusted-root loader.
 - `scripts/lint_prose.py` (no em dash, en dash, or spaced double-hyphen in prose).
 - `scripts/consistency_check.py --root .` (reference targets and FLOW locks; it
-  scans `docs/`, `skills/`, `agents/`, `.github/`, so the plugin copy under
-  `plugins/` does not affect it).
+  scans `docs/`, `skills/`, `.github/`, so the plugin copy under `plugins/` does
+  not affect it).
 - `scripts/check_secrets.py` (secret adjudication).
 
-Note: several upstream tests assert Claude Code specific facts (for example that
-`install.sh` references the ledger path, that `README.md` contains the installer
-hashes, and that the `/blog` command sets in `SKILL.md` and `docs/COMMANDS.md`
-match). Because the fork keeps those artifacts in place rather than deleting them,
-those tests continue to pass. This is intentional: low drift keeps the upstream
-suite meaningful.
-
-### Checks that do NOT apply in Cursor (Claude Code only)
-
-- `claude plugin validate .` and the CI `validate-skills` job that installs the
-  Claude Code CLI. This validates the Claude Code plugin packaging, which is not
-  how Cursor consumes the plugin. It is left unmodified as upstream reference and
-  is not required for the Cursor use case. If run without the Claude Code CLI it
-  simply cannot execute; that is documented here rather than forced.
+Tests that only asserted Claude Code installer or plugin facts (installer-sync,
+installer hashes, the Claude plugin manifest, the public-release validator, and
+the Brain gate) were removed along with the artifacts they covered, so the suite
+stays green without dead Claude Code coverage.
 
 ---
 
 ## What was NOT done (by design)
 
-- No files were deleted or moved out of the upstream source tree; the plugin is an
-  additive copy.
 - No plugin was installed onto any machine, into `~/.claude`, `~/.cursor`, or Grok
   Bot house skills.
 - No license, copyright, `NOTICE`, or attribution text was removed or weakened;
   the plugin bundles its own `LICENSE` and `NOTICE`.
-- No URLs, metrics, versions, or installer hashes were invented or altered.
+- No URLs, metrics, or versions were invented or altered.
 - The upstream version string (`2.2.0`) is left unchanged across all coherence
   surfaces, and reused for the plugin manifest.
-- The GitHub repository was not renamed; only the plugin identity is `cursor-blog`.

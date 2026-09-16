@@ -1,9 +1,0 @@
-{
-  "name": "claude-blog-brain-public-site",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "sanitize": "node scripts/sanitize-public.mjs",
-    "test": "node --test scripts/sanitize-public.test.mjs"
-  }
-}

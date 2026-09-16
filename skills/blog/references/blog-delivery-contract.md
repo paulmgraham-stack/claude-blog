@@ -11,7 +11,7 @@ This contract is the v1.9.0 answer to a failure pattern from the v1.8.x cycle: s
 | 1. Capability Discovery | Required tools + agents are available before write begins | Block if no valid local hero and no permitted image path; block if reviewer agent missing | `scripts/blog_preflight.py --gate 1` |
 | 2. Format Completeness | `.md` + `.html` + `.pdf` + `hero.(png\|jpg)` all present | Block on any missing artifact | `scripts/blog_render.py` renders `.html` and `.pdf`; `scripts/generate_hero.py` emits `hero.<ext>` |
 | 3. Visual Verification | Rendered HTML has no SVG overflow, no console errors, valid JSON-LD | Block on any defect; preserve screenshots | `scripts/blog_preflight.py --gate 3` via `patchright` |
-| 4. Content Review | `blog-reviewer` scores ≥ 90/100 AND zero P0 issues | Block + iterate | `agents/blog-reviewer.md` (now blocking) |
+| 4. Content Review | `blog-reviewer` scores ≥ 90/100 AND zero P0 issues | Block + iterate | the `blog-reviewer` role (now blocking) |
 | 5. Asset + Link Integrity | Every `<img>` resolves, every `<a>` returns 200, schema validates | Block on any 404 or count mismatch | `scripts/blog_preflight.py --gate 5` |
 
 All gates run sequentially. First failure halts the chain and triggers the iteration loop. Successful drafts ship with `preflight-report.json` + `review.md` + `preview/*.png` in the draft folder.
@@ -74,7 +74,7 @@ Strict delivery requires `patchright` or an equivalent renderer. If no renderer 
 
 ## Gate 4: Content Review (BLOCKING)
 
-The existing `blog-reviewer` agent (`agents/blog-reviewer.md`) runs against the rendered `.html` (not the raw `.md`). Reviewer output is now **blocking**, not advisory.
+The `blog-reviewer` role runs against the rendered `.html` (not the raw `.md`). Reviewer output is now **blocking**, not advisory. In Cursor the main agent performs this role inline, scoring against `skills/blog/references/quality-scoring.md` and `skills/blog/references/editorial-heuristics.md`.
 
 ### Blocking decision rules
 
@@ -170,7 +170,7 @@ https://github.com/AgriciDaniel/claude-blog/issues.
 - `skills/blog/references/editorial-heuristics.md`: the P0-P3 ordinal scoring used for the P0 filter in Gate 4
 - `skills/blog/references/visual-media.md`: image and asset standards consumed by Gate 5
 - `skills/blog/references/schema-stack.md`: JSON-LD structure validated by Gate 3 step 5
-- `agents/blog-reviewer.md`: the reviewer agent that produces the Gate 4 scorecard
+- the `blog-reviewer` role: produces the Gate 4 scorecard (run inline in Cursor)
 - `scripts/load_untrusted_root.py`: the v1.8.3 helper used for project-root file loading in Gate 1
 - `scripts/lint_prose.py`: the v1.8.4 prose linter run as part of Gate 4's editorial-heuristics scoring
 - `tests/test_blog_delivery_contract.py`: coherence test that asserts this contract and its implementation stay in sync

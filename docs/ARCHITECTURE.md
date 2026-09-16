@@ -138,17 +138,18 @@ Each sub-skill is a standalone Claude Code skill with its own:
 | blog-style | Learn author voice profiles from existing posts | v1.10.0 |
 | blog-decay | Detect GSC content decay and prioritize refresh candidates | v1.10.0 |
 
-### 3. Subagents (5)
+### 3. Subagent roles (5)
 
-**Location**: `agents/blog-*.md`
+**Where**: run inline by the main agent in Cursor.
 
-Specialized agents spawned by sub-skills via Claude Code's `Task` tool.
-Each agent has a focused role with a restricted tool set. None of the
-agents have Bash access; the v1.7.0 hardening removed Bash from the
-agent frontmatter to bound blast radius (see `agents/blog-reviewer.md`
-and `agents/blog-translator.md`).
+Five specialized roles drive research, drafting, SEO validation, quality
+review, and translation. Each role has a focused scope and a restricted
+tool surface; none require shell access. In Cursor the main agent performs
+these roles inline (the reviewer role scores against
+`skills/blog/references/quality-scoring.md` and
+`skills/blog/references/editorial-heuristics.md`).
 
-| Agent | Tools | Role |
+| Role | Tools | Purpose |
 |-------|-------|------|
 | blog-researcher | WebSearch, WebFetch, Read, Grep, Glob | Find statistics, images, competitive data |
 | blog-writer | Read, Write, Edit, Grep, Glob | Write and rewrite optimized content |
@@ -156,8 +157,7 @@ and `agents/blog-translator.md`).
 | blog-reviewer | Read, Grep, Glob | Quality review and scoring; **BLOCKING in v1.9.0** (emits `BLOCKING: true\|false (reason)` line parsed by `scripts/blog_preflight.py` Gate 4) |
 | blog-translator | Read, Write, Edit, Grep, Glob | Multilingual translation (v1.7.0; no Bash for blast-radius safety) |
 
-Agents are defined as markdown files with YAML frontmatter specifying their
-name, description, and available tools.
+Each role has a focused description and a minimal tool surface.
 
 ### 4. Reference Files (22)
 
@@ -509,12 +509,12 @@ After installation, `claude-blog` occupies this structure inside `~/.claude/`:
 sub-skills); 30 user-facing commands, 5 agents (blog-researcher, blog-writer, blog-seo, blog-reviewer,
 blog-translator), 22 references in `skills/blog/references/` (plus per-sub-skill
 references and 30 synced FLOW prompts under `skills/blog-flow/references/`),
-12 content templates, 17 root-level scripts (`scripts/analyze_blog.py`,
+12 content templates, 16 root-level scripts (`scripts/analyze_blog.py`,
 `ai_citation_score.py`, `blog_hygiene.py`, `blog_preflight.py`,
 `blog_render.py`, `cognitive_load.py`, `content_decay.py`,
 `discourse_research.py`, `generate_hero.py`, `load_untrusted_root.py`,
 `lint_prose.py`, `quality_gate.py`, `style_learn.py`, `sync_flow.py`,
-`consistency_check.py`, `dependency_smoke.py`, `validate_public_release.py`) plus per-sub-skill scripts under
+`consistency_check.py`, `dependency_smoke.py`) plus per-sub-skill scripts under
 `blog-google/`, `blog-notebooklm/`, `blog-audio/`, `blog-image/`.
 v1.8.0+ adds three project-root context files (BRAND.md / VOICE.md /
 DISCOURSE.md, auto-loaded via `scripts/load_untrusted_root.py` with

@@ -36,11 +36,12 @@ API keys or MCP servers; they are not required for the core writing workflow:
 
 ### Not part of this plugin
 
-The upstream Claude Code installers (`install.sh`, `install.ps1`), the Claude
-plugin manifest (`.claude-plugin/`), the Claude Code subagents (`agents/`), and
-the vendored `brain/` are intentionally excluded from the plugin payload. They
-remain in the repository root as upstream reference. See the repository
-[`CURATION.md`](../../CURATION.md).
+The upstream Claude Code installers, the Claude plugin manifest, the Claude Code
+subagent files, and the vendored Brain are not part of this plugin. Those
+Claude Code only leftovers have been removed from the repository; full upstream
+copies remain at
+[`AgriciDaniel/claude-blog`](https://github.com/AgriciDaniel/claude-blog). See
+the repository [`CURATION.md`](../../CURATION.md).
 
 ## Install locally in Cursor
 

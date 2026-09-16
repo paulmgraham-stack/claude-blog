@@ -33,7 +33,6 @@ HERO_PATH = ROOT / "scripts" / "generate_hero.py"
 WRITE_SKILL = ROOT / "skills" / "blog-write" / "SKILL.md"
 REWRITE_SKILL = ROOT / "skills" / "blog-rewrite" / "SKILL.md"
 ORCHESTRATOR = ROOT / "skills" / "blog" / "SKILL.md"
-REVIEWER = ROOT / "agents" / "blog-reviewer.md"
 PYPROJECT = ROOT / "pyproject.toml"
 
 
@@ -157,14 +156,6 @@ def test_orchestrator_references_contract() -> None:
         "skills/blog/SKILL.md must declare Step 6.5 (Delivery Contract Enforcement)"
 
 
-def test_reviewer_emits_blocking_line() -> None:
-    text = REVIEWER.read_text(encoding="utf-8")
-    assert "BLOCKING:" in text, \
-        "agents/blog-reviewer.md must emit a `BLOCKING:` line in its scorecard"
-    assert "Blocking Decision" in text or "Blocking decision" in text, \
-        "agents/blog-reviewer.md must document the blocking decision rules"
-
-
 def test_pyproject_declares_presentation_group() -> None:
     text = PYPROJECT.read_text(encoding="utf-8")
     assert "presentation" in text, \
@@ -172,16 +163,6 @@ def test_pyproject_declares_presentation_group() -> None:
     for dep in ("patchright", "weasyprint"):
         assert dep in text, \
             f"pyproject.toml `presentation` group must include {dep}"
-
-
-def test_installers_ship_all_new_scripts() -> None:
-    """The 3 new v1.9.0 scripts must be uninstall-aware (install.sh uses a
-    glob, but uninstall.sh enumerates explicitly)."""
-    uninstall_sh = (ROOT / "uninstall.sh").read_text(encoding="utf-8")
-    uninstall_ps1 = (ROOT / "uninstall.ps1").read_text(encoding="utf-8")
-    for script in ("blog_preflight.py", "blog_render.py", "generate_hero.py"):
-        assert script in uninstall_sh, f"uninstall.sh missing {script}"
-        assert script in uninstall_ps1, f"uninstall.ps1 missing {script}"
 
 
 # ---------------------------------------------------------------------------
@@ -431,7 +412,7 @@ def test_preflight_rejects_symlink_report_output(tmp_path: Path) -> None:
 def test_reference_count_coherence() -> None:
     """The number declared in skills/blog/SKILL.md must agree with the
     actual count in skills/blog/references/, and with the count claimed in
-    docs/ARCHITECTURE.md and CLAUDE.md."""
+    docs/ARCHITECTURE.md."""
     refs_dir = ROOT / "skills" / "blog" / "references"
     actual = sum(1 for p in refs_dir.iterdir() if p.is_file() and p.suffix == ".md")
 
@@ -449,14 +430,6 @@ def test_reference_count_coherence() -> None:
     declared_arch = int(m.group(1))
     assert declared_arch == actual, (
         f"docs/ARCHITECTURE.md says {declared_arch}; filesystem has {actual}"
-    )
-
-    claude_text = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
-    m = re.search(r"(\d+) reference docs", claude_text)
-    assert m, "CLAUDE.md must declare reference doc count"
-    declared_claude = int(m.group(1))
-    assert declared_claude == actual, (
-        f"CLAUDE.md says {declared_claude}; filesystem has {actual}"
     )
 
 

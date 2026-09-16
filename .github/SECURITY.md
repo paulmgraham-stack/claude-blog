@@ -151,9 +151,9 @@ please report it.
 
 ### WebFetch / WebSearch in `blog-researcher` agent
 
-**Where**: only `agents/blog-researcher.md` declares the WebSearch and
-WebFetch tools. `blog-writer` and `blog-translator` have `Read, Write,
-Edit, Glob, Grep`; `blog-seo` and `blog-reviewer` have `Read, Grep,
+**Where**: only the `blog-researcher` role uses the WebSearch and
+WebFetch tools. `blog-writer` and `blog-translator` use `Read, Write,
+Edit, Glob, Grep`; `blog-seo` and `blog-reviewer` use `Read, Grep,
 Glob`.
 
 **Inherent risk** (VULN-039 in audit, accepted): when an LLM agent
@@ -169,9 +169,8 @@ tool-driven retrieval.
    then a separate agent (`blog-writer`) generates content from that
    data. The fetched URL body does NOT directly drive tool calls in
    another agent.
-3. The skill instructions for `blog-researcher` (in `agents/blog-researcher.md`)
-   frame retrieved content as DATA to summarize, not INSTRUCTIONS to
-   execute.
+3. The skill instructions for the `blog-researcher` role frame retrieved
+   content as DATA to summarize, not INSTRUCTIONS to execute.
 
 **Residual risk**: Claude itself may still be steered by sufficiently
 clever indirect prompt injection. This is an active research problem.
