@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Cursor Blog">
+  <rect width="128" height="128" rx="24" fill="#0B0B0F"/>
+  <rect x="30" y="26" width="56" height="72" rx="6" fill="#1C1C24" stroke="#3B82F6" stroke-width="3"/>
+  <line x1="40" y1="42" x2="76" y2="42" stroke="#93C5FD" stroke-width="4" stroke-linecap="round"/>
+  <line x1="40" y1="56" x2="76" y2="56" stroke="#6B7280" stroke-width="4" stroke-linecap="round"/>
+  <line x1="40" y1="70" x2="66" y2="70" stroke="#6B7280" stroke-width="4" stroke-linecap="round"/>
+  <path d="M74 76 L104 92 L90 96 L86 110 Z" fill="#3B82F6" stroke="#0B0B0F" stroke-width="3" stroke-linejoin="round"/>
+</svg>

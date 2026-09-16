@@ -1,0 +1,24 @@
+{
+  "name": "cursor-blog",
+  "displayName": "Cursor Blog",
+  "version": "2.2.0",
+  "description": "Blog and SEO Agent Skills for Cursor: write, rewrite, outline, seo-check, analyze, strategy, GEO/AEO, schema, repurpose, factcheck, persona, topic clusters, and multilingual publishing. Adapted from AgriciDaniel/claude-blog (MIT).",
+  "author": {
+    "name": "AgriciDaniel",
+    "url": "https://github.com/AgriciDaniel"
+  },
+  "license": "MIT",
+  "keywords": [
+    "cursor",
+    "plugin",
+    "skills",
+    "blog",
+    "seo",
+    "content",
+    "geo",
+    "aeo",
+    "eeat",
+    "ai-citations"
+  ],
+  "logo": "assets/logo.svg"
+}
