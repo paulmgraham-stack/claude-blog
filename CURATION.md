@@ -74,10 +74,24 @@ plugins/
 
 - `plugins/cursor-blog/.cursor-plugin/plugin.json` is a **Cursor Plugin**
   manifest: `name` is the kebab-case `cursor-blog`, with `displayName`,
-  `description`, `version`, `license` (MIT), and `author` (AgriciDaniel).
+  `description`, `version`, `license` (MIT), `author` (AgriciDaniel), and an
+  explicit `"skills": "./skills/"` path so discovery matches shipping Cursor
+  skill-plugins (`cursor-team-kit`, `superpowers`, and gsap all declare a
+  `skills` path).
 - The repo-root `.cursor-plugin/marketplace.json` catalog lists the plugin with
   `source: ./plugins/cursor-blog`, so Cursor can import the repo with Customize ->
   "From GitHub Repository".
+
+### Verify discoverability (one-time, local to Cursor)
+
+This step cannot be run from a cloud VM or from CI; it needs a Cursor client.
+After installing the plugin (see below), open Customize -> Skills and confirm
+"Cursor Blog" and its sub-skills are listed under "Agent Decides". You can also
+type `/` in Agent chat and confirm the skills appear. If they do not, check that
+local plugin imports are allowed in your Cursor settings. The manifest and layout
+already pass the Cursor `plugin-template` validator
+(`scripts/validate-template.mjs`), but only a real Cursor load proves live
+discoverability.
 
 ### Why the plugin is a copy, not the top-level `skills/`
 
@@ -188,10 +202,14 @@ adaptations that make the contract run in Cursor:
    export CLAUDE_BLOG_LOAD_UNTRUSTED_HELPER="/abs/path/to/cursor-blog/scripts/load_untrusted_root.py"
    ```
 
-2. **Run the agent roles inline** from `agents/*.md`, or register equivalent
-   Cursor subagents, since the plugin does not bundle the Claude Code subagents.
-   The Python delivery-contract CLIs run directly either way, and the Gate 4
-   review is scored against `skills/blog/references/quality-scoring.md`.
+2. **Run the agent roles inline using bundled skills**, since the plugin does not
+   ship the Claude Code subagents. Where the suite mentions `blog-researcher`,
+   `blog-writer`, `blog-seo`, or `blog-reviewer`, the main agent performs those
+   roles inline from content that is in the payload: `blog-write` (research and
+   drafting), `blog-seo-check` (on-page validation), and `blog-analyze` scored
+   against `skills/blog/references/quality-scoring.md` and
+   `skills/blog/references/editorial-heuristics.md` (the Gate 4 review). The
+   Python delivery-contract CLIs run directly.
 
 So `blog-write` end-to-end is not a zero-config button in Cursor; it is ready as
 guidance plus CLIs, and fully orchestrated with the setup above.
@@ -204,9 +222,11 @@ Changes that reframe and wire the fork for Cursor without removing upstream
 capability:
 
 1. **Packaged as the `cursor-blog` Cursor plugin.** New
-   `plugins/cursor-blog/.cursor-plugin/plugin.json` and
-   `.cursor-plugin/marketplace.json`, with the skills/references/templates/scripts
-   copied into the plugin payload so Cursor discovers them.
+   `plugins/cursor-blog/.cursor-plugin/plugin.json` (with an explicit
+   `"skills": "./skills/"` path, matching shipping Cursor skill-plugins such as
+   `cursor-team-kit` and `superpowers`) and `.cursor-plugin/marketplace.json`,
+   with the skills/references/templates/scripts copied into the plugin payload so
+   Cursor discovers them.
 2. **SKILL.md frontmatter.** `compatibility:` fields that read "Requires Claude
    Code" now say the skills work from Cursor Agent Skills or Claude Code. The
    orchestrator `description` no longer implies `/blog` is the only entry point.

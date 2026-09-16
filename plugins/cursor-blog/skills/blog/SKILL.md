@@ -253,39 +253,42 @@ For `/blog audit`, step 6 runs in parallel across all posts in the directory.
 
 Internal workflow details live in `skills/blog/references/orchestration-details.md`.
 
-## Running in Cursor (curated fork)
+## Running in Cursor (the cursor-blog plugin)
 
-This repository is a curated Cursor fork. When it is loaded as a Cursor Agent
-Plugin (root `plugin.json`, see `CURATION.md`), the skills are discovered from
-`skills/`, but the Claude Code subagents in `agents/` and the `~/.claude/scripts`
-install tree are NOT present. Two adjustments make the workflows run in Cursor
+When installed as the `cursor-blog` Cursor plugin (manifest
+`plugins/cursor-blog/.cursor-plugin/plugin.json`, see `CURATION.md`), Cursor
+discovers the skills from the plugin's `skills/` directory. The Claude Code
+subagents in `agents/` and the `~/.claude/scripts` install tree are NOT part of
+the plugin. Two adjustments make the write and rewrite workflows run in Cursor
 without a Claude Code install:
 
-1. **Helper scripts: point the absolute overrides at this repo.** The delivery
-   contract and untrusted-context loader resolve helpers from
-   `$HOME/.claude/scripts` by default and refuse project-local `scripts/` from an
-   untrusted current working directory. Both accept an operator-pinned absolute
-   override, so set them to this repo's own `scripts/` directory (an absolute
-   path you control):
+1. **Helper scripts: point the absolute overrides at the plugin's bundled
+   scripts.** The delivery contract and untrusted-context loader resolve helpers
+   from `$HOME/.claude/scripts` by default and refuse project-local `scripts/`
+   from an untrusted current working directory. Both accept an operator-pinned
+   absolute override. The plugin bundles the scripts under its own `scripts/`
+   directory, so point the overrides at that absolute path (for a local install,
+   typically `~/.cursor/plugins/local/cursor-blog/scripts`):
 
    ```bash
-   export CLAUDE_BLOG_SCRIPTS_DIR="/abs/path/to/claude-blog/scripts"
-   export CLAUDE_BLOG_LOAD_UNTRUSTED_HELPER="/abs/path/to/claude-blog/scripts/load_untrusted_root.py"
+   export CLAUDE_BLOG_SCRIPTS_DIR="/abs/path/to/cursor-blog/scripts"
+   export CLAUDE_BLOG_LOAD_UNTRUSTED_HELPER="/abs/path/to/cursor-blog/scripts/load_untrusted_root.py"
    ```
 
    These are the same absolute-override code paths the security model already
    allows; the CWD-based fallback stays disabled.
 
-2. **Agents: run their instructions inline when Task subagents are not
-   registered.** In Claude Code, steps 2 to 6 dispatch `blog-researcher`,
-   `blog-writer`, `blog-seo`, and the blocking `blog-reviewer` via the Task tool.
-   In Cursor those agent files are not auto-registered from `agents/`. Either
-   register equivalent Cursor subagents, or have the main agent follow the same
-   role instructions inline from `agents/*.md`. The Python delivery-contract CLIs
-   (`scripts/blog_render.py`, `scripts/blog_preflight.py`,
-   `scripts/generate_hero.py`) run directly either way, and the Gate 4 review is
-   scored against `skills/blog/references/quality-scoring.md`. The gates still
-   review before the user; only the dispatch mechanism changes.
+2. **Agent roles: perform them inline using bundled skills, not Task subagents.**
+   The plugin does not ship the Claude Code subagents. Where this suite mentions
+   `blog-researcher`, `blog-writer`, `blog-seo`, or the blocking `blog-reviewer`,
+   the main agent performs those roles inline using content that ships in the
+   plugin: research and drafting guidance from the `blog-write` skill, on-page
+   validation from `blog-seo-check`, and the Gate 4 review scored with
+   `blog-analyze` against `skills/blog/references/quality-scoring.md` and
+   `skills/blog/references/editorial-heuristics.md`. The Python delivery-contract
+   CLIs (`scripts/blog_render.py`, `scripts/blog_preflight.py`,
+   `scripts/generate_hero.py`) run directly. The gates still review before the
+   user; only the dispatch mechanism changes.
 
 ## Integration
 

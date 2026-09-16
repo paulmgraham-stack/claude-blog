@@ -20,5 +20,6 @@
     "eeat",
     "ai-citations"
   ],
-  "logo": "assets/logo.svg"
+  "logo": "assets/logo.svg",
+  "skills": "./skills/"
 }

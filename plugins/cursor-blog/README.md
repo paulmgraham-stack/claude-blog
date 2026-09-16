@@ -55,9 +55,11 @@ local checkout:
    ```
 
 2. Restart Cursor, or run `Developer: Reload Window`.
-3. Open Customize and confirm `Cursor Blog` appears under Skills. Local plugin
-   imports must be allowed in your Cursor settings (on Teams and Enterprise, an
-   admin controls "Allow Local Plugin Imports").
+3. **Verify discoverability** (only a real Cursor client can do this; it cannot be
+   done from a cloud VM or CI): open Customize and confirm `Cursor Blog` and its
+   sub-skills appear under Skills. Typing `/` in Agent chat should also list them.
+   Local plugin imports must be allowed in your Cursor settings (on Teams and
+   Enterprise, an admin controls "Allow Local Plugin Imports").
 
 Alternatively, import the whole repository from GitHub: in Customize, choose
 "From GitHub Repository". The root `.cursor-plugin/marketplace.json` lists this
