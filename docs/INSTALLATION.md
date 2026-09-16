@@ -1,5 +1,17 @@
 # Installation Guide
 
+> **Upstream Claude Code reference only.** This entire guide describes the
+> **upstream Claude Code** installation into `~/.claude` (installer scripts, curl
+> download flow, plugin marketplace). It is **not** the path for the curated
+> Cursor / Grok Bot fork and is kept here for parity with upstream. If you are
+> using this fork in Cursor, do **not** follow this guide: read
+> [`../CURATION.md`](../CURATION.md) and
+> [`upstream-claude-code/README.md`](upstream-claude-code/README.md) instead.
+> Cursor discovers the skills from the `cursor-blog` Cursor plugin, whose manifest
+> is `plugins/cursor-blog/.cursor-plugin/plugin.json` (the repo root holds only the
+> `.cursor-plugin/marketplace.json` catalog); no `~/.claude` install and no `curl`
+> download are required.
+
 This guide covers all installation methods for `claude-blog`, a Claude Code skill
 ecosystem for blog content creation, optimization, and management.
 

@@ -1,0 +1,17 @@
+{
+  "name": "cursor-blog-marketplace",
+  "owner": {
+    "name": "AgriciDaniel"
+  },
+  "metadata": {
+    "description": "Curated Cursor plugin adapted from AgriciDaniel/claude-blog (MIT): blog and SEO Agent Skills.",
+    "version": "2.2.0"
+  },
+  "plugins": [
+    {
+      "name": "cursor-blog",
+      "source": "./plugins/cursor-blog",
+      "description": "Blog and SEO Agent Skills: write, rewrite, outline, seo-check, analyze, strategy, GEO/AEO, schema, repurpose, factcheck, persona, topic clusters, and multilingual publishing. Adapted from AgriciDaniel/claude-blog (MIT)."
+    }
+  ]
+}
