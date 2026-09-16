@@ -18,6 +18,25 @@
   <img src="https://img.shields.io/badge/Tests-250%2B%20passing-brightgreen" alt="Tests: more than 250 passing">
 </p>
 
+> ### Curated Cursor / Grok Bot fork
+>
+> This repository is a **curated fork** of
+> [`AgriciDaniel/claude-blog`](https://github.com/AgriciDaniel/claude-blog)
+> (MIT), reframed for **Cursor Agent Skills** and Grok Bot house use. It keeps
+> the blog and SEO skill value and makes the same skills usable from Cursor by
+> natural language, while clearly marking the parts that are Claude Code only
+> (installers, plugin manifest, `/blog` slash-command CLI, subagents, Brain).
+>
+> - Read [`CURATION.md`](CURATION.md) first: it maps what is Cursor ready, what
+>   was adapted, and what is left as upstream Claude Code reference.
+> - Claude Code specific artifacts are indexed in
+>   [`docs/upstream-claude-code/README.md`](docs/upstream-claude-code/README.md).
+> - Nothing was installed into `~/.claude`, a local skills library, or a Cursor
+>   marketplace. All upstream credit, license, and attribution are preserved.
+> - The rest of this README below is the **upstream Claude Code documentation**,
+>   kept for reference. Where it says "install into `~/.claude`" or "run `/blog`",
+>   see the Cursor equivalents in [`CURATION.md`](CURATION.md).
+
 **claude-blog is a Claude Code skill suite that writes, optimizes, audits, localizes, and refreshes blog content at scale.** Every article is evaluated for Google-aligned usefulness and internal AI citation readiness heuristics. Version 2.2.0 was prepared on 2026-08-26.
 
 The core promise is simple: the user is never the first reviewer. A 5-gate Blog Delivery Contract scores every draft against a 100-point rubric, blocks delivery below 90, verifies artifacts and links, and iterates up to 3 times before escalation.
@@ -251,6 +270,29 @@ Adapted attribution lives in [`CONTRIBUTORS.md`](docs/CONTRIBUTORS.md).
 The Claude Blog Brain is vendored at `./brain` as a self-contained, evidence-gated Obsidian brain. It is not part of the plugin payload; all skill tooling remains scoped to `skills/`. Brain-derived updates land through reviewed reference, script, and documentation changes.
 
 ## Install
+
+### Use in Cursor (this fork)
+
+Cursor Agent Skills are read from `SKILL.md` files on demand, so there is no
+install step and no `/blog` CLI requirement:
+
+1. Add this repository (or its `skills/` directory) to a Cursor workspace, or
+   reference the skills from your Cursor skills configuration.
+2. Describe the task in natural language, for example "Write a blog post about X
+   and score it". Each `skills/*/SKILL.md` `description` carries the trigger
+   phrases Cursor uses to pick the right skill.
+3. Run the Python tooling directly (see the commands in
+   [`CURATION.md`](CURATION.md)).
+
+Full Cursor usage, including the secondary skills that need external API keys,
+is documented in [`CURATION.md`](CURATION.md).
+
+### Install in Claude Code (upstream reference)
+
+The instructions below are the upstream Claude Code installation path. They copy
+the suite into `~/.claude` and are **not** required for the Cursor use case; they
+are kept here for parity with upstream. See
+[`docs/upstream-claude-code/README.md`](docs/upstream-claude-code/README.md).
 
 Plugin install for Claude Code 1.0.33+:
 
