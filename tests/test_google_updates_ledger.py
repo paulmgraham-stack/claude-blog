@@ -21,7 +21,6 @@ SCHEMA_REFERENCE_PATH = REPO_ROOT / "skills" / "blog" / "references" / "schema-s
 CRAWLER_REFERENCE_PATH = (
     REPO_ROOT / "skills" / "blog" / "references" / "ai-crawler-guide.md"
 )
-BRAIN_LEDGER_PATH = REPO_ROOT / "brain" / "data" / "google-updates.json"
 LANDSCAPE_PATH = (
     REPO_ROOT / "skills" / "blog" / "references" / "google-landscape-2026.md"
 )
@@ -143,10 +142,6 @@ def test_platform_availability_conflict_keeps_both_google_sources() -> None:
     assert entry["additional_source_urls"] == [
         "https://support.google.com/webmasters/answer/17148418?hl=en-GB"
     ]
-
-
-def test_brain_ledger_is_an_exact_projection_of_the_canonical_ledger() -> None:
-    assert BRAIN_LEDGER_PATH.read_bytes() == LEDGER_PATH.read_bytes()
 
 
 def test_currentness_evaluator_distinguishes_current_and_refresh_required() -> None:

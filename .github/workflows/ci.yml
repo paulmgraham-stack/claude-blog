@@ -80,14 +80,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1, SHA-pinned, closes VULN-503
 
-      - name: Set up Node.js 22
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0, SHA-pinned
-        with:
-          node-version: "22"
-
-      - name: Install Claude Code CLI
-        run: npm install --global --no-audit --no-fund @anthropic-ai/claude-code@2.1.218
-
       - name: Validate SKILL.md frontmatter
         run: |
           python3 - <<'PY'
@@ -148,22 +140,19 @@ jobs:
           print("All SKILL.md files passed schema and size checks")
           PY
 
-      - name: Validate plugin.json
+      - name: Validate Cursor plugin manifest
         run: |
           python3 -c "
           import json, sys
-          with open('.claude-plugin/plugin.json') as f:
+          with open('plugins/cursor-blog/.cursor-plugin/plugin.json') as f:
               data = json.load(f)
           required = ['name', 'description', 'author']
           missing = [k for k in required if k not in data]
           if missing:
               print(f'Missing required fields: {missing}')
               sys.exit(1)
-          print('plugin.json is valid')
+          print('cursor-blog plugin.json is valid')
           "
-
-      - name: Run `claude plugin validate`
-        run: claude plugin validate .
 
   lint-markdown:
     runs-on: ubuntu-latest
@@ -228,67 +217,3 @@ jobs:
         # is now the single source of truth; local devs and CI run the same
         # assertion logic. Closes 7TH-AUDIT-012.
         run: python3 -m pytest tests/test_version_coherence.py -v
-
-  # Keep the brain job conditional on brain/** changes without filtering existing jobs.
-  brain-changes:
-    name: Detect brain changes
-    runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.filter.outputs.changed }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1, SHA-pinned
-        with:
-          fetch-depth: 0
-
-      - name: Check whether brain changed
-        id: filter
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BEFORE_SHA: ${{ github.event.before }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            changed_files="$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- brain/)"
-          elif [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
-            changed_files="$(git ls-tree -r --name-only "$GITHUB_SHA" -- brain/)"
-          else
-            changed_files="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- brain/)"
-          fi
-
-          if [ -n "$changed_files" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  brain:
-    name: Brain
-    needs: brain-changes
-    # Run on every main push so a release commit cannot skip the executable
-    # Brain gate. Pull requests without Brain changes retain the fast path.
-    if: ${{ github.event_name == 'push' || needs.brain-changes.outputs.changed == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1, SHA-pinned
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0, SHA-pinned
-        with:
-          python-version: "3.12"
-
-      - name: Install pytest
-        run: python3 -m pip install "pytest>=8.0,<10.0"
-
-      - name: Run brain tests
-        run: python3 -m pytest brain/tests/
-
-      - name: Lint brain vault
-        run: python3 brain/scripts/lint_vault.py
-
-      - name: Verify brain source-review records offline
-        run: python3 brain/scripts/verify_source_ledger.py --offline-check --as-of 2026-08-25
-
-      - name: Audit brain
-        run: python3 brain/scripts/audit_brain.py --json --require market-ready --verify

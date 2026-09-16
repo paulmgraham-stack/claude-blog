@@ -29,7 +29,8 @@ def _read_pyproject_version() -> str | None:
 
 
 def _read_plugin_version() -> str | None:
-    with open(ROOT / ".claude-plugin" / "plugin.json", encoding="utf-8") as f:
+    manifest = ROOT / "plugins" / "cursor-blog" / ".cursor-plugin" / "plugin.json"
+    with open(manifest, encoding="utf-8") as f:
         return json.load(f).get("version")
 
 
@@ -56,7 +57,7 @@ def test_all_version_surfaces_aligned() -> None:
     """
     versions = {
         "pyproject.toml": _read_pyproject_version(),
-        ".claude-plugin/plugin.json": _read_plugin_version(),
+        "plugins/cursor-blog/.cursor-plugin/plugin.json": _read_plugin_version(),
         "CITATION.cff": _read_citation_version(),
         "skills/blog/SKILL.md": _read_skill_md_version(),
     }

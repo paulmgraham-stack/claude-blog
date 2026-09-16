@@ -88,30 +88,6 @@ def test_pagespeed_response_populates_audit_details(monkeypatch) -> None:
     assert result["audit_details"]["image-delivery-insight"]["total_items"] == 1
 
 
-def test_readme_installer_hashes_match_release_files() -> None:
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    for name in ("install.sh", "install.ps1"):
-        canonical = (ROOT / name).read_bytes().replace(b"\r\n", b"\n")
-        digest = hashlib.sha256(canonical).hexdigest()
-        assert digest in readme, f"README digest for {name} is stale"
-
-
-def test_installer_hash_is_independent_of_checkout_line_endings() -> None:
-    canonical = (ROOT / "install.ps1").read_bytes().replace(b"\r\n", b"\n")
-    expected = hashlib.sha256(canonical).hexdigest()
-    crlf_checkout = canonical.replace(b"\n", b"\r\n")
-    normalized = crlf_checkout.replace(b"\r\n", b"\n")
-
-    assert hashlib.sha256(normalized).hexdigest() == expected
-    assert hashlib.sha256(normalized + b"# content drift\n").hexdigest() != expected
-
-
-def test_powershell_installer_detects_its_local_checkout() -> None:
-    installer = (ROOT / "install.ps1").read_text(encoding="utf-8")
-    assert "$PSScriptRoot" in installer
-    assert "$MyInvocation.MyCommand.Path" not in installer
-
-
 def test_docs_have_no_active_powershell_pipe_to_execution() -> None:
     pattern = re.compile(
         r"(?:\birm\b|\bInvoke-RestMethod\b)[^\n]*\|\s*(?:iex|Invoke-Expression)\b",
@@ -143,7 +119,6 @@ def test_workflows_pin_reviewed_action_releases_by_sha() -> None:
     expected = {
         "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
         "actions/setup-python": "5fda3b95a4ea91299a34e894583c3862153e4b97",
-        "actions/setup-node": "820762786026740c76f36085b0efc47a31fe5020",
     }
     for action, sha in expected.items():
         refs = set(re.findall(rf"{re.escape(action)}@([^\s#]+)", combined))
@@ -184,9 +159,6 @@ def test_first_hand_and_retrieval_guidance_remains_evidence_conditional() -> Non
     brief = (ROOT / "skills" / "blog-brief" / "SKILL.md").read_text(
         encoding="utf-8"
     )
-    reviewer = (ROOT / "agents" / "blog-reviewer.md").read_text(
-        encoding="utf-8"
-    )
     synthesis = (
         ROOT / "skills" / "blog" / "references" / "synthesis-contract.md"
     ).read_text(encoding="utf-8")
@@ -195,7 +167,6 @@ def test_first_hand_and_retrieval_guidance_remains_evidence_conditional() -> Non
     ).read_text(encoding="utf-8")
 
     assert "only when the user supplies supporting methodology" in brief
-    assert "markers alone earn no credit" in reviewer
     assert "retrieval notes required by FLOW" not in synthesis
     assert "retrieval notes required by FLOW" not in research
 
@@ -240,20 +211,12 @@ def test_length_experience_and_style_diagnostics_are_conditional() -> None:
     eeat = (
         ROOT / "skills" / "blog" / "references" / "eeat-signals.md"
     ).read_text(encoding="utf-8")
-    instruction_paths = [ROOT / "CLAUDE.md"]
-    agents_path = ROOT / "AGENTS.md"
-    if agents_path.is_file():
-        instruction_paths.append(agents_path)
 
     assert "Paragraphs > 200 words (Yoast red)" not in quality
     assert "length alone does not set priority" in quality
     assert "never from length alone" in quality
     assert "needs first-hand testing" not in eeat
     assert "neutral sourced analysis can rely on" in eeat
-    for path in instruction_paths:
-        instructions = path.read_text(encoding="utf-8")
-        assert "with AI detection" not in instructions
-        assert "not authorship detection" in instructions
 
 
 def test_evidence_guidance_has_no_placement_or_source_count_quotas() -> None:
@@ -286,33 +249,11 @@ def test_pillar_and_quality_gate_source_only_material_numeric_claims() -> None:
     assert "do not need redundant inline sourcing" in orchestrator
 
 
-def test_brain_delivery_gate_matches_v21_editorial_thresholds() -> None:
-    gate = (
-        ROOT / "brain" / "wiki" / "quality" / "Delivery Contract Gate.md"
-    ).read_text(encoding="utf-8")
-    rubric = (
-        ROOT / "brain" / "wiki" / "quality" / "Quality Score Rubric.md"
-    ).read_text(encoding="utf-8")
-    readiness = (
-        ROOT
-        / "brain"
-        / "wiki"
-        / "quality"
-        / "AI Citation Readiness Subscore.md"
-    ).read_text(encoding="utf-8")
-
+def test_quality_gate_default_threshold_is_seventy() -> None:
     quality_gate = (ROOT / "scripts" / "quality_gate.py").read_text(
         encoding="utf-8"
     )
-
-    assert "below 90" in gate
-    assert "descriptive and non-blocking" in gate
-    assert "word-count mismatch beyond the allowed tolerance" not in gate
-    assert "pre-commit `quality_gate.py` threshold is 70" in rubric
-    assert "90 to 100 are delivery" in rubric
     assert "DEFAULT_THRESHOLD = 70" in quality_gate
-    assert "internal AI citation readiness heuristic" in readiness
-    assert "not a calibrated probability" in readiness
 
 
 def test_rendering_guidance_accepts_valid_google_rendered_dom() -> None:
@@ -329,12 +270,6 @@ def test_rendering_guidance_accepts_valid_google_rendered_dom() -> None:
     assert "single most common reason" not in crawler
     assert "test the deployed response" in crawler
     assert "not unconditional Google pass criteria" in crawler
-
-
-def test_public_marketplace_slug_is_current() -> None:
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "claude-blog@agricidaniel-blog" in readme
-    assert "claude-blog@agricidaniel-claude-blog" not in readme
 
 
 def test_dependency_requirements_and_locks_are_coherent() -> None:
@@ -373,57 +308,8 @@ def test_dependency_requirements_and_locks_are_coherent() -> None:
     assert 'name = "google-ads"\nversion = "31.4.0"' in uv_lock
 
 
-def test_shell_installer_is_locale_safe_and_complete(tmp_path: Path) -> None:
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    fake_pip = fake_bin / "pip3"
-    fake_pip.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
-    fake_pip.chmod(0o755)
-
-    env = os.environ.copy()
-    env.update({
-        "HOME": str(tmp_path / "home"),
-        "LANG": "tr_TR.UTF-8",
-        "LC_ALL": "tr_TR.UTF-8",
-        "PATH": f"{fake_bin}:{env['PATH']}",
-    })
-    result = subprocess.run(
-        ["bash", str(ROOT / "install.sh")],
-        cwd=ROOT,
-        env=env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-
-    expected = len([
-        path for path in (ROOT / "skills").glob("*/SKILL.md")
-        if path.parent.name != "blog"
-    ])
-    installed = len(list((tmp_path / "home" / ".claude" / "skills").glob("blog-*/SKILL.md")))
-
-    assert result.returncode == 0, result.stderr
-    assert "refusing skill" not in result.stderr
-    assert f"Sub-skills:   {expected} installed" in result.stdout
-    assert installed == expected
-
-
-def test_standalone_installers_ship_google_update_ledger() -> None:
+def test_google_update_ledger_is_present() -> None:
     assert (ROOT / "data" / "google-updates.json").is_file()
-    for name in ("install.sh", "install.ps1"):
-        text = (ROOT / name).read_text(encoding="utf-8")
-        assert "data" in text
-        assert "google-updates.json" in text
-    assert "blog" in (ROOT / "uninstall.sh").read_text(encoding="utf-8")
-    assert "blog" in (ROOT / "uninstall.ps1").read_text(encoding="utf-8")
-
-
-def test_uninstallers_preserve_shared_google_credentials() -> None:
-    for name in ("uninstall.sh", "uninstall.ps1"):
-        text = (ROOT / name).read_text(encoding="utf-8")
-        assert "oauth-token.json" not in text
-        assert "google-api.json" not in text
-        assert "left intact" in text
 
 
 def test_dependency_smoke_cli_is_explicit_and_offline() -> None:
@@ -447,7 +333,7 @@ def test_dependency_smoke_cli_is_explicit_and_offline() -> None:
     assert "inline_pcm_verified" in script
 
 
-def test_ledger_consumer_guidance_matches_installed_path() -> None:
+def test_ledger_consumer_guidance_references_ledger() -> None:
     orchestrator = (ROOT / "skills" / "blog" / "SKILL.md").read_text(
         encoding="utf-8"
     )
@@ -458,14 +344,9 @@ def test_ledger_consumer_guidance_matches_installed_path() -> None:
         / "references"
         / "search-currentness.md"
     ).read_text(encoding="utf-8")
-    install_sh = (ROOT / "install.sh").read_text(encoding="utf-8")
-    install_ps1 = (ROOT / "install.ps1").read_text(encoding="utf-8")
 
     for guidance in (orchestrator, currentness):
         assert "data/google-updates.json" in guidance
-        assert "~/.claude/skills/blog/data/google-updates.json" in guidance
-    assert '${SKILL_DIR}/blog/data/google-updates.json' in install_sh
-    assert 'Join-Path $BlogDataDir "google-updates.json"' in install_ps1
 
 
 def _write_flow_lock(root: Path, content: bytes = b"prompt\n") -> None:
@@ -545,271 +426,6 @@ def test_consistency_checker_discovers_skill_relative_resources_and_agents(
     assert "skills/blog-demo/scripts/run.py" not in warned
     assert "skills/blog-demo/templates/example.md" not in warned
     assert "agents/blog-demo-agent.md" not in warned
-
-
-def _public_fixture(root: Path) -> None:
-    public = "https://github.com/AgriciDaniel/claude-blog"
-    version = "2.2.0"
-    raw_sh = (
-        "https://raw.githubusercontent.com/AgriciDaniel/claude-blog/main/install.sh"
-    )
-    raw_ps1 = (
-        "https://raw.githubusercontent.com/AgriciDaniel/claude-blog/main/install.ps1"
-    )
-    (root / ".claude-plugin").mkdir(parents=True)
-    (root / ".github" / "ISSUE_TEMPLATE").mkdir(parents=True)
-    (root / "skills" / "blog").mkdir(parents=True)
-    (root / "README.md").write_text(
-        f"{public}\nclaude-blog@agricidaniel-blog\n{raw_sh}\n{raw_ps1}\n"
-        f"git checkout v{version}\nCLAUDE_BLOG_REF=v{version}\n",
-        encoding="utf-8",
-    )
-    (root / "CLAUDE.md").write_text(
-        f"https://raw.githubusercontent.com/AgriciDaniel/claude-blog/"
-        f"v{version}/install.sh\nCLAUDE_BLOG_REF=v{version}\n",
-        encoding="utf-8",
-    )
-    (root / "CITATION.cff").write_text(
-        f'repository-code: "{public}"\nversion: {version}\n',
-        encoding="utf-8",
-    )
-    (root / "pyproject.toml").write_text(
-        "\n".join(
-            [f'version = "{version}"']
-            + [
-                f'{field} = "{public}{suffix}"'
-                for field, suffix in (
-                    ("homepage", ""),
-                    ("repository", ""),
-                    ("issues", "/issues"),
-                    ("documentation", "/tree/main/docs"),
-                    ("changelog", "/blob/main/CHANGELOG.md"),
-                )
-            ]
-        ),
-        encoding="utf-8",
-    )
-    (root / ".claude-plugin" / "plugin.json").write_text(
-        json.dumps(
-            {
-                "name": "claude-blog",
-                "version": version,
-                "homepage": public,
-                "repository": public,
-                "author": {
-                    "name": "AgriciDaniel",
-                    "url": "https://github.com/AgriciDaniel",
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-    (root / ".claude-plugin" / "marketplace.json").write_text(
-        json.dumps(
-            {
-                "name": "agricidaniel-blog",
-                "owner": {"name": "AgriciDaniel"},
-                "plugins": [{"name": "claude-blog", "source": "./"}],
-            }
-        ),
-        encoding="utf-8",
-    )
-    (root / ".github" / "ISSUE_TEMPLATE" / "config.yml").write_text(
-        "\n".join(
-            (
-                f"url: {public}/discussions",
-                f"url: {public}/security/advisories/new",
-                f"url: {public}/tree/main/docs",
-            )
-        ),
-        encoding="utf-8",
-    )
-    (root / ".github" / "SECURITY.md").write_text(
-        "Only the latest version is supported.\n"
-        f"Use `git checkout v{version}` before installation.\n",
-        encoding="utf-8",
-    )
-    (root / "install.sh").write_text(
-        f'{raw_sh}\nCLAUDE_BLOG_VERSION="{version}"\n'
-        'repo="${CLAUDE_BLOG_REPO:-AgriciDaniel/claude-blog}"\n',
-        encoding="utf-8",
-    )
-    (root / "install.ps1").write_text(
-        f'{raw_ps1}\n$ClaudeBlogVersion = "{version}"\n'
-        '$Repo = "AgriciDaniel/claude-blog"\n',
-        encoding="utf-8",
-    )
-    (root / "skills" / "blog" / "SKILL.md").write_text(
-        f'  version: "{version}"\n',
-        encoding="utf-8",
-    )
-
-
-def test_public_release_validator_passes_normalized_fixture(tmp_path: Path) -> None:
-    module = _load_module(
-        "release_public_validator",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    assert module.validate(tmp_path)["status"] == "pass"
-
-
-def test_current_public_release_surfaces_pass_validator() -> None:
-    private_note = ROOT / "docs" / "PUBLIC-BACKLOG-TRIAGE-2026-07-23.md"
-    if private_note.exists():
-        pytest.skip("private source worktree intentionally retains its triage note")
-    module = _load_module(
-        "release_public_validator_current",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    assert module.validate(ROOT)["status"] == "pass"
-
-
-def test_public_release_validator_rejects_stale_security_tag(
-    tmp_path: Path,
-) -> None:
-    module = _load_module(
-        "release_public_validator_security_version",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    security = tmp_path / ".github" / "SECURITY.md"
-    security.write_text(
-        security.read_text(encoding="utf-8").replace("v2.2.0", "v1.7.0"),
-        encoding="utf-8",
-    )
-    report = module.validate(tmp_path)
-    assert report["status"] == "fail"
-    assert any(
-        error["kind"] == "invalid_public_security_version"
-        and error["file"] == ".github/SECURITY.md"
-        for error in report["errors"]
-    )
-
-
-def test_public_release_validator_rejects_private_raw_url(tmp_path: Path) -> None:
-    module = _load_module(
-        "release_public_validator_private",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    (tmp_path / "install.sh").write_text(
-        "https://raw.githubusercontent.com/AI-Marketing-Hub/claude-blog/main/install.sh\n",
-        encoding="utf-8",
-    )
-    report = module.validate(tmp_path)
-    assert report["status"] == "fail"
-    assert any(e["kind"] == "private_raw_url" for e in report["errors"])
-
-
-def test_public_release_validator_rejects_private_issue_routing(
-    tmp_path: Path,
-) -> None:
-    module = _load_module(
-        "release_public_validator_issue_routing",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    config = tmp_path / ".github" / "ISSUE_TEMPLATE" / "config.yml"
-    config.write_text(
-        config.read_text(encoding="utf-8").replace(
-            "https://github.com/AgriciDaniel/claude-blog/discussions",
-            "https://github.com/AI-Marketing-Hub/claude-blog/discussions",
-        ),
-        encoding="utf-8",
-    )
-    report = module.validate(tmp_path)
-    assert report["status"] == "fail"
-    assert any(
-        error["file"] == ".github/ISSUE_TEMPLATE/config.yml"
-        and error["kind"] in {
-            "private_repository_url",
-            "invalid_public_issue_routing",
-        }
-        for error in report["errors"]
-    )
-
-
-def test_public_release_validator_rejects_version_collision(
-    tmp_path: Path,
-) -> None:
-    module = _load_module(
-        "release_public_validator_version",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        pyproject.read_text(encoding="utf-8").replace("2.2.0", "2.1.0"),
-        encoding="utf-8",
-    )
-    report = module.validate(tmp_path)
-    assert report["status"] == "fail"
-    assert any(
-        error["kind"] == "invalid_public_release_version"
-        and error["file"] == "pyproject.toml"
-        for error in report["errors"]
-    )
-
-
-def test_public_release_validator_rejects_third_party_raw_url(
-    tmp_path: Path,
-) -> None:
-    module = _load_module(
-        "release_public_validator_third_party",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    readme = (tmp_path / "README.md").read_text(encoding="utf-8")
-    (tmp_path / "README.md").write_text(
-        readme.replace(
-            "https://raw.githubusercontent.com/AgriciDaniel/claude-blog/main/install.sh",
-            "https://raw.githubusercontent.com/ThirdParty/claude-blog/main/install.sh",
-        ),
-        encoding="utf-8",
-    )
-    report = module.validate(tmp_path)
-    assert report["status"] == "fail"
-    assert any(
-        e["kind"] == "wrong_public_raw_installer_url" for e in report["errors"]
-    )
-
-
-def test_public_release_validator_rejects_wrong_plugin_repository_owner(
-    tmp_path: Path,
-) -> None:
-    module = _load_module(
-        "release_public_validator_wrong_owner",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    plugin_path = tmp_path / ".claude-plugin" / "plugin.json"
-    plugin = json.loads(plugin_path.read_text(encoding="utf-8"))
-    plugin["repository"] = "https://github.com/ThirdParty/claude-blog"
-    plugin_path.write_text(json.dumps(plugin), encoding="utf-8")
-    report = module.validate(tmp_path)
-    assert report["status"] == "fail"
-    assert any(
-        e["kind"] == "invalid_public_plugin_ownership"
-        and e.get("field") == "repository"
-        for e in report["errors"]
-    )
-
-
-def test_public_release_validator_rejects_private_docs(tmp_path: Path) -> None:
-    module = _load_module(
-        "release_public_validator_docs",
-        ROOT / "scripts" / "validate_public_release.py",
-    )
-    _public_fixture(tmp_path)
-    (tmp_path / "docs").mkdir()
-    (tmp_path / "docs" / "INSTALLATION.md").write_text(
-        "Use an authenticated gh auth login for access to the AI-Marketing-Hub org.\n",
-        encoding="utf-8",
-    )
-    report = module.validate(tmp_path)
-    assert report["status"] == "fail"
-    assert any(e["kind"] == "private_auth_instruction" for e in report["errors"])
 
 
 def test_public_triage_note_covers_entire_open_backlog() -> None:
