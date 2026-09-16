@@ -5,11 +5,13 @@ description: >
   and 5 agents. Routes requests to the right sub-skill: writing, rewriting,
   analysis, outlines, audits, schema, charts, images, repurposing, AI citation
   SEO, FLOW prompts, topic clusters, and multilingual publishing. Optimized for
-  Google rankings, E-E-A-T, and AI citations. Supports any platform. Use when
-  user says "blog", "blog post", "blog audit", "topic cluster",
-  "multilingual blog", or any /blog subcommand.
+  Google rankings, E-E-A-T, and AI citations. Supports any platform. Works from
+  Cursor Agent Skills by natural language or from a Claude Code /blog subcommand.
+  Use when the user asks to write, rewrite, outline, audit, or score a blog post,
+  plan a topic cluster, publish multilingual content, or says "blog", "blog post",
+  "blog audit", "topic cluster", "multilingual blog", or any /blog subcommand.
 license: MIT
-compatibility: Requires Claude Code and Python 3.11+ for quality scoring
+compatibility: Works from Cursor Agent Skills or Claude Code; Python 3.11+ for quality scoring
 metadata:
   author: AgriciDaniel
   version: "2.2.0"

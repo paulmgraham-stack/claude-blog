@@ -12,7 +12,7 @@ description: >
   "cluster plan", "cluster execute", "pillar content", "hub and spoke",
   "content ecosystem", "cluster map".
 license: MIT
-compatibility: Requires Claude Code and claude-blog (provides blog-write, blog-chart, blog-image)
+compatibility: Works from Cursor Agent Skills or Claude Code; uses claude-blog (blog-write, blog-chart, blog-image)
 metadata:
   author: AgriciDaniel
   version: "2.2.0"
