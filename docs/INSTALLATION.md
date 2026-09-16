@@ -7,8 +7,10 @@
 > using this fork in Cursor, do **not** follow this guide: read
 > [`../CURATION.md`](../CURATION.md) and
 > [`upstream-claude-code/README.md`](upstream-claude-code/README.md) instead.
-> Cursor discovers the skills from the Agent Plugin manifest at the repo root; no
-> `~/.claude` install, no `curl` download, and no marketplace step are required.
+> Cursor discovers the skills from the `cursor-blog` Cursor plugin, whose manifest
+> is `plugins/cursor-blog/.cursor-plugin/plugin.json` (the repo root holds only the
+> `.cursor-plugin/marketplace.json` catalog); no `~/.claude` install and no `curl`
+> download are required.
 
 This guide covers all installation methods for `claude-blog`, a Claude Code skill
 ecosystem for blog content creation, optimization, and management.
