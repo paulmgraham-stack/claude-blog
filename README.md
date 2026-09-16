@@ -22,11 +22,14 @@
 >
 > This repository is a **curated fork** of
 > [`AgriciDaniel/claude-blog`](https://github.com/AgriciDaniel/claude-blog)
-> (MIT), reframed for **Cursor Agent Skills** and Grok Bot house use. It keeps
-> the blog and SEO skill value and makes the same skills usable from Cursor by
-> natural language, while clearly marking the parts that are Claude Code only
-> (installers, plugin manifest, `/blog` slash-command CLI, subagents, Brain).
+> (MIT), reframed for **Cursor Agent Skills** and Grok Bot house use. The
+> Cursor-ready skills are packaged as a real Cursor plugin named `cursor-blog`
+> (display name "Cursor Blog") under
+> [`plugins/cursor-blog/`](plugins/cursor-blog), while the parts that are Claude
+> Code only (installers, `.claude-plugin/` manifest, `/blog` slash-command CLI,
+> subagents, Brain) are clearly marked and kept out of the plugin payload.
 >
+> - New here? Jump to [Use in Cursor: the `cursor-blog` plugin](#use-in-cursor-the-cursor-blog-plugin).
 > - Read [`CURATION.md`](CURATION.md) first: it maps what is Cursor ready, what
 >   was adapted, and what is left as upstream Claude Code reference.
 > - Claude Code specific artifacts are indexed in
@@ -271,21 +274,32 @@ The Claude Blog Brain is vendored at `./brain` as a self-contained, evidence-gat
 
 ## Install
 
-### Use in Cursor (this fork)
+### Use in Cursor: the `cursor-blog` plugin
 
-Cursor Agent Skills are read from `SKILL.md` files on demand, so there is no
-install step and no `/blog` CLI requirement:
+Cursor does not auto-scan a bare top-level `skills/` directory. This fork ships a
+real **Cursor plugin** named `cursor-blog` (display name "Cursor Blog") that
+packages the Cursor-ready skills in the layout Cursor discovers. It lives at
+[`plugins/cursor-blog/`](plugins/cursor-blog) with a
+`plugins/cursor-blog/.cursor-plugin/plugin.json` manifest, and the repo-root
+[`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) catalog lists
+it for GitHub import.
 
-1. Add this repository (or its `skills/` directory) to a Cursor workspace, or
-   reference the skills from your Cursor skills configuration.
-2. Describe the task in natural language, for example "Write a blog post about X
-   and score it". Each `skills/*/SKILL.md` `description` carries the trigger
-   phrases Cursor uses to pick the right skill.
-3. Run the Python tooling directly (see the commands in
-   [`CURATION.md`](CURATION.md)).
+Install it locally (no marketplace needed):
 
-Full Cursor usage, including the secondary skills that need external API keys,
-is documented in [`CURATION.md`](CURATION.md).
+```bash
+mkdir -p ~/.cursor/plugins/local
+cp -r plugins/cursor-blog ~/.cursor/plugins/local/cursor-blog
+```
+
+Then restart Cursor (or run `Developer: Reload Window`) and confirm "Cursor Blog"
+appears in Customize under Skills. Full install and usage details are in
+[`plugins/cursor-blog/README.md`](plugins/cursor-blog/README.md) and
+[`CURATION.md`](CURATION.md). The Claude Code subagents in `agents/`, the
+`.claude-plugin/` manifest, `brain/`, and the installer scripts are intentionally
+excluded from the plugin payload.
+
+Publishing `cursor-blog` to the Cursor Marketplace is optional and can be done
+later.
 
 ### Install in Claude Code (upstream reference)
 
